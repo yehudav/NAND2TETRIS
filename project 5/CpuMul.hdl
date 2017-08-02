@@ -1,0 +1,112 @@
+/**
+* This chip is an extension of the book CPU by using the extended ALU.
+* More specificly if instruction[15]==0 or (instruction[14] and instruction[13] equals 1)
+* the CpuMul behave exactly as the book CPU.
+* While if it is C instruction and instruction[13] == 0 the output will be D*A/M 
+* (according to instruction[12]).
+* Moreover, if it is c instruction and instruction[14] == 0 it will behave as follows:
+*
+* instruction:  | 12 | 11 | 10 |
+* _____________________________
+* shift left D  | 0  | 1  | 1  |
+* shift left A  | 0  | 1  | 0  |
+* shift left M  | 1  | 1  | 0  |
+* shift right D | 0  | 0  | 1  |
+* shift right A | 0  | 0  | 0  |
+* shift right M | 1  | 0  | 0  |
+**/
+
+CHIP CpuMul{
+
+    IN  inM[16],         // M value input  (M = contents of RAM[A])
+        instruction[16], // Instruction for execution
+        reset;           // Signals whether to re-start the current
+                         // program (reset=1) or continue executing
+                         // the current program (reset=0).
+
+    OUT outM[16],        // M value output
+        writeM,          // Write into M? 
+        addressM[15],    // Address in data memory (of M)
+        pc[15];          // address of next instruction
+
+     PARTS:
+	 
+	// in = "i xx a cccccc ddd jjj "
+	// cccccc - alu instructions 
+	// a - determines if  ALU will operate on  A  or on the Memory input
+	// i -  the instruction type,  “ 0 ” for an A “ 1 ” for a C-instruction
+	// d1 = A , d2 = D , d3  = M
+	
+	
+	//mux a
+	
+	Mux16(a=instruction, b=aluout, sel=instruction[15], out=ina);
+
+	//A 
+	
+	Not(in=instruction[15], out=notOp);
+
+	Or(a=notOp, b=instruction[5], out=loada);             			  // if instruction[15] = 0 -> a or d1 = a
+	
+	ARegister(in=ina, load=loada, out=outa, out[0..14]=addressM);
+
+	
+	//mux b
+	
+	And(a=instruction[15], b=instruction[12], out=mora);     // i bit - 0 for A,  or a bit - 1 for M 
+	
+	Mux16(a=outa, b=inM, sel=mora, out=MorA);
+	
+	
+	//D
+	
+	And(a=instruction[15], b=instruction[4], out=loadd);     // i bit - 1 for D and d2 bit - 1 for D
+	
+	DRegister(in=aluout, load=loadd,out=outd);
+
+	
+	
+	//alu - cccccc = alu instructions
+	
+	ExtendAlu(x=outd, y=MorA, instruction=instruction[6..14], out=aluout, out=outM, zr=zr, ng=ng);	
+
+	
+	//writeM
+	
+	And(a=instruction[15], b=instruction[3], out=writeM);  // d3 bit - for M 
+
+	//pc
+
+	//if out=0 then zr=1 else zr=0 
+	//if out<0 then ng=1 else ng=0 
+	
+	
+	Not(in=zr, out=notzr);
+
+	Not(in=ng, out=notng);
+	
+	And(a=instruction[15], b=instruction[0], out=jgt);   // c and j3 = 1
+	
+	And(a=notng, b=notzr, out=positive);			     // number > 0 and j3 = 1
+	
+	And(a=positive, b=jgt, out=or1);
+
+	
+	And(a=instruction[15], b=instruction[1], out=jeq);   // number = 0 and j2 = 1 
+	
+	And(a=zr, b=jeq, out=or2);
+
+	
+	And(a=instruction[15],b=instruction[2],out=jlt);     // number < 0 and j3 = 1
+	
+	And(a=ng, b=jlt, out=or3);
+
+	Or(a=or1, b=or2, out=or4);
+	
+	Or(a=or3, b=or4, out=pcload);
+
+	
+	PC(in=outa, load=pcload, inc=true, reset=reset, out[0..14]=pc);
+
+
+}

@@ -1,0 +1,104 @@
+CHIP Mul {
+    IN a[16], b[16];
+    OUT out[16];
+
+    PARTS:
+
+
+    Mux16(a=false, b=a, sel=b[0], out=add0);               //shift and add
+
+    ShiftLeft(in=a, out=a1);
+
+    Mux16(a=false, b=a1, sel=b[1], out=add1);
+
+    ShiftLeft(in=a1, out=a2);
+
+    Mux16(a=false, b=a2, sel=b[2], out=add2);
+
+    ShiftLeft(in=a2, out=a3);
+
+    Mux16(a=false, b=a3, sel=b[3], out=add3);
+
+    ShiftLeft(in=a3, out=a4);
+
+    Mux16(a=false, b=a4, sel=b[4], out=add4);
+
+    ShiftLeft(in=a4, out=a5);
+
+    Mux16(a=false, b=a5, sel=b[5], out=add5);
+
+    ShiftLeft(in=a5, out=a6);
+
+    Mux16(a=false, b=a6, sel=b[6], out=add6);
+
+    ShiftLeft(in=a6, out=a7);
+
+    Mux16(a=false, b=a7, sel=b[7], out=add7);
+
+    ShiftLeft(in=a7, out=a8);
+
+    Mux16(a=false, b=a8, sel=b[8], out=add8);
+
+    ShiftLeft(in=a8, out=a9);
+
+    Mux16(a=false, b=a9, sel=b[9], out=add9);
+
+    ShiftLeft(in=a9, out=a10);
+
+    Mux16(a=false, b=a10, sel=b[10], out=add10);
+
+    ShiftLeft(in=a10, out=a11);
+
+    Mux16(a=false, b=a11, sel=b[11], out=add11);
+
+    ShiftLeft(in=a11, out=a12);
+
+    Mux16(a=false, b=a12, sel=b[12], out=add12);
+
+    ShiftLeft(in=a12, out=a13);
+
+    Mux16(a=false, b=a13, sel=b[13], out=add13);
+
+    ShiftLeft(in=a13, out=a14);
+
+    Mux16(a=false, b=a14, sel=b[14], out=add14);
+
+    ShiftLeft(in=a14, out=a15);
+
+    Mux16(a=false, b=a15, sel=b[15], out=add15);
+
+
+
+
+    Add16(a=add0, b=add1, out=sum1);        //adding
+
+    Add16(a=add2, b=add3, out=sum2);
+
+    Add16(a=add4, b=add5, out=sum3);
+
+    Add16(a=add6, b=add7, out=sum4);
+
+    Add16(a=add8, b=add9, out=sum5);
+
+    Add16(a=add10, b=add11, out=sum6);
+
+    Add16(a=add12, b=add13, out=sum7);
+
+    Add16(a=add14, b=add15, out=sum8);
+
+    Add16(a=sum1, b=sum2, out=sum9);
+
+    Add16(a=sum3, b=sum4, out=sum10);
+
+    Add16(a=sum5, b=sum6, out=sum11);
+
+    Add16(a=sum7, b=sum8, out=sum12);
+
+    Add16(a=sum9, b=sum10, out=sum13);
+
+    Add16(a=sum11, b=sum12, out=sum14);
+
+    Add16(a=sum13, b=sum14, out=out);
+
+
+}
